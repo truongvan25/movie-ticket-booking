@@ -4,6 +4,11 @@ import { useRoutes } from "react-router-dom";
 
 import AdminLayout from "../pages/admin/AdminLayout.jsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
+import AdminMovies from "../pages/admin/AdminMovies.jsx";
+import AdminUsers from "../pages/admin/AdminUsers.jsx";
+import AdminTheaters from "../pages/admin/AdminTheaters.jsx";
+import AdminBookings from "../pages/admin/AdminBookings.jsx";
+import AdminRevenue from "../pages/admin/AdminRevenue.jsx";
 
 import ManagerLayout from "../pages/manager/ManagerLayout.jsx";
 import ManagerDashboard from "../pages/manager/ManagerDashboard.jsx";
@@ -58,7 +63,27 @@ const useRouterElements = () => {
                 {
                     path: ADMIN_PATH.DASHBOARD,
                     element: <AdminDashboard />,
-                }
+                },
+                {
+                    path: ADMIN_PATH.MOVIES,
+                    element: <AdminMovies />,
+                },
+                {
+                    path: ADMIN_PATH.USERS,
+                    element: <AdminUsers />,
+                },
+                {
+                    path: ADMIN_PATH.THEATERS,
+                    element: <AdminTheaters />,
+                },
+                {
+                    path: ADMIN_PATH.BOOKINGS,
+                    element: <AdminBookings />,
+                },
+                {
+                    path: ADMIN_PATH.REVENUE,
+                    element: <AdminRevenue />,
+                },
             ]
         },
         {

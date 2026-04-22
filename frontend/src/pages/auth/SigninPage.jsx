@@ -16,14 +16,13 @@ const SigninPage = () => {
     const { isAuthenticated, status, error, user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        // If login is successful and auth status is 'succeeded', navigate to dashboard
         if (isAuthenticated && status === 'succeeded') {
-            console.log(user); 
-            //điều hướng tại đây
             if (user.role === 'admin') {
                 navigate('/admin/dashboard', { replace: true });
             } else if (user.role === 'theater-manager') {
                 navigate('/manager/dashboard', { replace: true });
+            } else {
+                navigate('/', { replace: true });
             }
         }
     }, [isAuthenticated, status, navigate, user]);
@@ -79,7 +78,7 @@ const SigninPage = () => {
                     layout="vertical" // Stack labels above inputs
                 >
                     <Form.Item
-                        label="email"
+                        label="Email"
                         name="email"
                         rules={[
                             { required: true, message: 'Please input your email!' },

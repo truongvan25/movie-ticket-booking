@@ -14,6 +14,11 @@ export const PATH = {
 
 export const ADMIN_PATH = {
 	DASHBOARD: "dashboard",
+	MOVIES: "movies",
+	USERS: "users",
+	THEATERS: "theaters",
+	BOOKINGS: "bookings",
+	REVENUE: "revenue",
 };
 
 export const MANAGER_PATH = {
