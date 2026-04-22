@@ -5,43 +5,40 @@ import User from "../models/user.model.js";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import { CONNREFUSED } from "dns";
 
 dotenv.config();
 
-var transport = nodemailer.createTransport({
-	host: process.env.SMTP_HOST,
-	port: process.env.SMTP_PORT,
-	auth: {
-		user: process.env.SMTP_USER,
-		pass: process.env.SMTP_PASS,
-	},
-});
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+const transport = smtpConfigured
+	? nodemailer.createTransport({
+		host: process.env.SMTP_HOST,
+		port: process.env.SMTP_PORT,
+		auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+	})
+	: null;
 
 const generateToken = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");
 
 export const sendVerificationEmail = async (email, verifyKey, userName) => {
-	const verifyLink = `${process.env.FRONTEND_URL}/auth/verify-email?verified=1&email=${encodeURIComponent(
-		email
-	)}&verifyKey=${verifyKey}`;
-	const data = {
-		from: "Cinema Gate <no-reply@cinemagate.com>",
-		to: email,
-		subject: "Xác thực tài khoản Cinema Gate",
-		html: `
-            <h3>Xin chào ${userName || ""}!</h3>
-            <p>Bạn vừa đăng ký tài khoản Cinema Gate. Vui lòng bấm vào liên kết dưới đây để xác thực email:</p>
-            <a href="${verifyLink}">${verifyLink}</a>
-            <br /><br />
-            <p>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
-        `,
-	};
+	if (!transport) return;
+	const verifyLink = `${process.env.FRONTEND_URL}/auth/verify-email?verified=1&email=${encodeURIComponent(email)}&verifyKey=${verifyKey}`;
 	try {
-		let info = await transport.sendMail(data);
-		console.log("Email sent: ", info.messageId);
+		const info = await transport.sendMail({
+			from: "Cinema Gate <no-reply@cinemagate.com>",
+			to: email,
+			subject: "Xác thực tài khoản Cinema Gate",
+			html: `
+                <h3>Xin chào ${userName || ""}!</h3>
+                <p>Bạn vừa đăng ký tài khoản Cinema Gate. Vui lòng bấm vào liên kết dưới đây để xác thực email:</p>
+                <a href="${verifyLink}">${verifyLink}</a>
+                <br /><br />
+                <p>Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.</p>
+            `,
+		});
+		console.log("Email sent:", info.messageId);
 	} catch (err) {
-		console.error("Lỗi gửi email xác thực: ", err);
-		throw new Error("Không gửi được email xác thực!");
+		console.error("Lỗi gửi email xác thực:", err);
 	}
 };
 
@@ -122,53 +119,51 @@ export const signUp = async (req, res) => {
 		if (checkUser)
 			return responseHandler.badRequest(res, "Email đã được sử dụng.");
 
-		if (!password) {
-			return responseHandler.badRequest(
-				res,
-				"Mật khẩu không được để trống."
-			);
-		}
-
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
-		const verifyKey = generateToken();
-		const verifyKeyExpires = Date.now() + 24 * 60 * 60 * 1000;
+
+		const needsEmailVerify = smtpConfigured;
+		const verifyKey = needsEmailVerify ? generateToken() : "";
+		const verifyKeyExpires = needsEmailVerify
+			? Date.now() + 24 * 60 * 60 * 1000
+			: undefined;
 
 		const user = new User({
 			email,
 			userName,
 			password: hashedPassword,
 			salt,
-			isVerified: false,
+			isVerified: !needsEmailVerify,
 			isDeleted: false,
 			verifyKey,
 			verifyKeyExpires,
 		});
 
-		await sendVerificationEmail(user.email, user.verifyKey, user.userName);
 		await user.save();
 
-		if (user.isVerified) {
-			const token = jwt.sign(
-				{ id: user._id, role: user.role },
-				process.env.JWT_SECRET,
-				{ expiresIn: "7d" }
-			);
-			const userData = user.toObject();
-			delete userData.password;
-			delete userData.salt;
-			delete userData.verifyKey;
+		if (needsEmailVerify) {
+			sendVerificationEmail(user.email, user.verifyKey, user.userName);
 			return responseHandler.created(res, {
-				token,
-				user: userData,
-				id: user._id,
+				requireVerify: true,
+				message: "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
 			});
 		}
 
+		const token = jwt.sign(
+			{ id: user._id, role: user.role },
+			process.env.JWT_SECRET,
+			{ expiresIn: "7d" }
+		);
+		const userData = user.toObject();
+		delete userData.password;
+		delete userData.salt;
+		delete userData.verifyKey;
+
 		return responseHandler.created(res, {
-			message:
-				"Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
-			id: user._id,
+			requireVerify: false,
+			message: "Đăng ký thành công! Bạn có thể đăng nhập ngay.",
+			token,
+			user: userData,
 		});
 	} catch (err) {
 		console.error("Lỗi đăng ký:", err);

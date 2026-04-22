@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Movie from "../models/movie.model.js";
 import Theater from "../models/theater.model.js";
+import TheaterSystem from "../models/theaterSystem.model.js";
 import Booking from "../models/booking.model.js";
 import Show from "../models/show.model.js";
 import responseHandler from "../handlers/response.handler.js";

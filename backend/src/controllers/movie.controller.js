@@ -1,4 +1,5 @@
 import Movie from "../models/movie.model.js";
+import Review from "../models/review.model.js";
 import responseHandler from "../handlers/response.handler.js";
 
 const getMovies = async (req, res) => {
@@ -30,4 +31,17 @@ const getMovieById = async (req, res) => {
     }
 };
 
-export default { getMovies, getMovieById };
+const getMovieReviews = async (req, res) => {
+    try {
+        const { movieId } = req.params;
+        const reviews = await Review.find({ movieId })
+            .populate("userId", "userName")
+            .sort({ createdAt: -1 });
+        return responseHandler.ok(res, reviews);
+    } catch (err) {
+        console.error("getMovieReviews error:", err);
+        responseHandler.error(res);
+    }
+};
+
+export default { getMovies, getMovieById, getMovieReviews };
