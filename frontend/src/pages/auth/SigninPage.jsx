@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button, Typography, message } from "antd";
+import { Form, Input, Button, Typography, message, Card, Checkbox } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/features/auth.slice.js";
@@ -18,7 +18,7 @@ const SigninPage = () => {
     useEffect(() => {
         // If login is successful and auth status is 'succeeded', navigate to dashboard
         if (isAuthenticated && status === 'succeeded') {
-            console.log(user); ư
+            console.log(user); 
             //điều hướng tại đây
             if (user.role === 'admin') {
                 navigate('/admin/dashboard', { replace: true });
@@ -116,7 +116,7 @@ const SigninPage = () => {
                         <Button
                             type="primary"
                             htmlType="submit"
-                            loading={status === 'verifying'}
+                            loading={status === 'loading'}
                             className="w-full rounded-md pt-4 pb-5 text-lg font-semibold text-center"
                         >
                             Log in
