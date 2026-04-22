@@ -14,7 +14,7 @@ const signInValidator = [
 ];
 
 const resendEmailValidator = [
-	param("email").isEmail().withMessage("Email không hợp lệ"),
+	body("email").isEmail().withMessage("Email không hợp lệ"),
 ];
 
 const forgotPasswordValidator = [

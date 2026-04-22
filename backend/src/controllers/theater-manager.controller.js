@@ -1,21 +1,20 @@
 import responseHandler from "../handlers/response.handler.js";
-import Movie from "../models/movie.model.js"; 
+import Movie from "../models/movie.model.js";
 
-
-// Thêm phim mới
 const addMovie = async (req, res) => {
   try {
-    const { movieName, description, genre, duration, releaseDate, poster, movieRating } = req.body;
+    const { movieName, description, genres, duration, releaseDate, poster, ageRating, status } = req.body;
 
     const newMovie = new Movie({
       movieName,
       description,
-      genre,
+      genres,
       duration,
       releaseDate,
       poster,
-      movieRating,
-      theaterManagerId: req.user._id, // Lưu ID của theater manager
+      ageRating,
+      status,
+      theaterManagerId: req.user._id,
     });
 
     await newMovie.save();
@@ -26,22 +25,22 @@ const addMovie = async (req, res) => {
   }
 };
 
-// Cập nhật thông tin phim
- const updateMovie = async (req, res) => {
+const updateMovie = async (req, res) => {
   try {
     const { movieId } = req.params;
-    const { movieName, description, genre, duration, releaseDate, poster, movieRating } = req.body;
+    const { movieName, description, genres, duration, releaseDate, poster, ageRating, status } = req.body;
 
-    const movie = await Movie.findOne({ _id: movieId });
+    const movie = await Movie.findOne({ _id: movieId, isDeleted: false });
     if (!movie) return responseHandler.notFound(res, "Không tìm thấy phim.");
 
-    movie.movieName = movieName || movie.movieName;
-    movie.description = description || movie.description;
-    movie.genre = genre || movie.genre;
-    movie.duration = duration || movie.duration;
-    movie.releaseDate = releaseDate || movie.releaseDate;
-    movie.poster = poster || movie.poster;
-    movie.movieRating = movieRating || movie.movieRating;
+    if (movieName) movie.movieName = movieName;
+    if (description) movie.description = description;
+    if (genres) movie.genres = genres;
+    if (duration) movie.duration = duration;
+    if (releaseDate) movie.releaseDate = releaseDate;
+    if (poster) movie.poster = poster;
+    if (ageRating) movie.ageRating = ageRating;
+    if (status) movie.status = status;
 
     await movie.save();
     return responseHandler.ok(res, { message: "Cập nhật phim thành công!", movie });
@@ -51,16 +50,16 @@ const addMovie = async (req, res) => {
   }
 };
 
-// Xóa phim (soft delete)
+// Soft delete — chỉ đánh dấu isDeleted, không xóa khỏi DB
 const deleteMovie = async (req, res) => {
   try {
     const { movieId } = req.params;
 
-    const movie = await Movie.findOne({ _id: movieId});
+    const movie = await Movie.findOne({ _id: movieId, isDeleted: false });
     if (!movie) return responseHandler.notFound(res, "Không tìm thấy phim.");
 
     movie.isDeleted = true;
-    await Movie.deleteOne({ _id: movieId });
+    await movie.save();
 
     return responseHandler.ok(res, { message: "Xóa phim thành công!" });
   } catch (err) {
@@ -69,9 +68,8 @@ const deleteMovie = async (req, res) => {
   }
 };
 
-
 export default {
   addMovie,
   updateMovie,
-  deleteMovie
+  deleteMovie,
 };

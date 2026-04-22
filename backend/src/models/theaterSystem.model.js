@@ -13,10 +13,12 @@ const theaterSystemSchema = new mongoose.Schema({
     },
     logo: {
         type: String,
-        default: "https://example.com/default-logo.png",
+        default: null,
     },
     description: {
         type: String,
-        default: "No description available.",
+        default: null,
     },
 });
+
+export default mongoose.model("TheaterSystem", theaterSystemSchema);

@@ -5,6 +5,9 @@ const roomSchema = new mongoose.Schema({
     roomNumber: {
         type: String,
         required: true,
-        unique: true,
     },
 });
+
+roomSchema.index({ theaterId: 1, roomNumber: 1 }, { unique: true });
+
+export default mongoose.model("Room", roomSchema);
