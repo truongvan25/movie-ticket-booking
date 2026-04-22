@@ -15,87 +15,127 @@ function SignupPage() {
   const onFinish = async (values) => {
     dispatch(showLoading());
     try {
-      const res = await publicClient.post("user/signup", values);
-      message.success(res?.data?.message || "Đăng ký thành công!");
-      navigate(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
+      const res = await publicClient.post("user/signup", {
+        userName: values.userName,
+        email: values.email,
+        password: values.password,
+      });
+
+      const data = res?.data;
+      message.success(data?.message || "Đăng ký thành công!");
+
+      if (data?.requireVerify) {
+        navigate(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
+      } else {
+        navigate("/auth/signin");
+      }
     } catch (err) {
-      message.error(err.response?.data?.message || "Đăng ký thất bại");
+      const msg = err?.data?.message || err?.message || "Đăng ký thất bại";
+      message.error(msg);
     } finally {
       dispatch(hideLoading());
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e293b] via-[#f472b6] to-[#fbbf24] p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-10 relative">
-          <div className="flex flex-col items-center mb-8">
-            <img
-              src="../../../public/img/logo.png"
-              alt="Cinema Gate"
-              className="w-40 h-40 mb-2 drop-shadow-lg"
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-          <div className="flex flex-col items-center mb-6">
-            <UserAddOutlined className="text-4xl text-[#2563eb] mb-2 drop-shadow-sm" />
-            <Title level={2} className="mb-1 text-gray-800 font-semibold">Đăng ký tài khoản</Title>
-            <Text className="text-gray-500 text-base mb-2">Tạo tài khoản mới để trải nghiệm <span className="text-orange-500 font-bold">Cinema Gate</span></Text>
-          </div>
-          <Form
-            name="signup"
-            layout="vertical"
-            autoComplete="off"
-            onFinish={onFinish}
-            initialValues={{ remember: true }}
-            className="space-y-2"
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 p-4">
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8">
+        <div className="flex flex-col items-center mb-8">
+          <span className="text-red-500 text-5xl mb-2">🎬</span>
+          <h1 className="text-white text-2xl font-bold">
+            Cine<span className="text-red-500">Book</span>
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Tạo tài khoản mới</p>
+        </div>
+
+        <Form
+          name="signup"
+          layout="vertical"
+          autoComplete="off"
+          onFinish={onFinish}
+        >
+          <Form.Item
+            label={<span className="text-gray-300 text-sm">Tên người dùng</span>}
+            name="userName"
+            rules={[{ required: true, message: "Hãy nhập tên người dùng!" }]}
           >
-            <Form.Item
-              label={<span className="font-semibold">Tên người dùng</span>}
-              name="userName"
-              rules={[{ required: true, message: "Hãy nhập tên người dùng!" }]}
+            <Input
+              size="large"
+              placeholder="Tên của bạn"
+              className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-300 text-sm">Email</span>}
+            name="email"
+            rules={[
+              { required: true, message: "Hãy nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
+            ]}
+          >
+            <Input
+              size="large"
+              placeholder="Email của bạn"
+              className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-300 text-sm">Mật khẩu</span>}
+            name="password"
+            rules={[
+              { required: true, message: "Hãy nhập mật khẩu!" },
+              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+            ]}
+          >
+            <Input.Password
+              size="large"
+              placeholder="Nhập mật khẩu"
+              className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-300 text-sm">Xác nhận mật khẩu</span>}
+            name="confirmPassword"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: "Hãy xác nhận mật khẩu!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value)
+                    return Promise.resolve();
+                  return Promise.reject(new Error("Mật khẩu không khớp!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              size="large"
+              placeholder="Nhập lại mật khẩu"
+              className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+            />
+          </Form.Item>
+
+          <Form.Item className="mb-0 mt-2">
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              block
+              className="rounded-lg font-semibold bg-red-500 hover:bg-red-600 border-0"
             >
-              <Input size="large" placeholder="Tên của bạn" className="rounded-xl" />
-            </Form.Item>
-            <Form.Item
-              label={<span className="font-semibold">Email</span>}
-              name="email"
-              rules={[
-                { required: true, message: "Hãy nhập email!" },
-                { type: "email", message: "Email không hợp lệ!" },
-              ]}
-            >
-              <Input size="large" placeholder="Email của bạn" className="rounded-xl" />
-            </Form.Item>
-            <Form.Item
-              label={<span className="font-semibold">Mật khẩu</span>}
-              name="password"
-              rules={[{ required: true, message: "Hãy nhập mật khẩu!" }]}
-            >
-              <Input.Password size="large" placeholder="Nhập mật khẩu" className="rounded-xl" />
-            </Form.Item>
-            <Form.Item className="mb-0">
-              <Button
-                type="primary"
-                htmlType="submit"
-                size="large"
-                block
-                className="rounded-xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 border-0 hover:from-pink-500 hover:to-orange-500"
-                style={{ boxShadow: "0 6px 20px 0 #f472b6AA" }}
-              >
-                Đăng ký
-              </Button>
-            </Form.Item>
-          </Form>
-          {/* Divider */}
-          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent my-6" />
-          {/* Link đăng nhập */}
-          <div className="text-center">
-            <Text>Đã có tài khoản? </Text>
-            <Link to="/auth/signin" className="text-[#2563eb] font-semibold hover:underline">
-              Đăng nhập
-            </Link>
-          </div>
+              Đăng ký
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <div className="text-center mt-6 text-sm text-gray-500">
+          Đã có tài khoản?{" "}
+          <Link to="/auth/signin" className="text-red-400 hover:text-red-300 font-medium">
+            Đăng nhập
+          </Link>
         </div>
       </div>
     </div>

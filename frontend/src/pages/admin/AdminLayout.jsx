@@ -63,19 +63,28 @@ const AdminLayout = () => {
                     })}
                 </nav>
 
-                {/* User + Logout */}
-                <div className="border-t border-gray-800 px-3 py-3">
+                {/* User + Actions */}
+                <div className="border-t border-gray-800 px-3 py-3 space-y-1">
                     {!collapsed && (
                         <div className="mb-2 px-1">
                             <p className="text-white text-xs font-semibold truncate">{user?.userName}</p>
                             <p className="text-gray-500 text-xs truncate">{user?.email}</p>
                         </div>
                     )}
+                    <Link
+                        to="/"
+                        title={collapsed ? "Trang chủ" : ""}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition"
+                    >
+                        <span className="shrink-0">🏠</span>
+                        {!collapsed && <span>Trang chủ</span>}
+                    </Link>
                     <button
                         onClick={() => dispatch(logout())}
+                        title={collapsed ? "Đăng xuất" : ""}
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition"
                     >
-                        <span>🚪</span>
+                        <span className="shrink-0">🚪</span>
                         {!collapsed && <span>Đăng xuất</span>}
                     </button>
                 </div>

@@ -4,11 +4,14 @@ import adminApi from "../../api/modules/admin.api.js";
 function AdminTheaters() {
     const [theaters, setTheaters] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
+        setError(null);
         adminApi.getTheaters()
             .then((res) => setTheaters(res?.data || []))
+            .catch(() => setError("Không thể tải dữ liệu rạp phim"))
             .finally(() => setLoading(false));
     }, []);
 
@@ -51,6 +54,12 @@ function AdminTheaters() {
                                         ))}
                                     </tr>
                                 ))
+                            ) : error ? (
+                                <tr>
+                                    <td colSpan={4} className="px-4 py-10 text-center text-red-400">
+                                        {error}
+                                    </td>
+                                </tr>
                             ) : filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-4 py-10 text-center text-gray-600">

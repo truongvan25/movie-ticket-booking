@@ -48,6 +48,28 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
+                {(user?.role === "admin" || user?.role === "theater-manager") && (
+                  <Link
+                    to={user.role === "admin" ? "/admin/dashboard" : "/manager/dashboard"}
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition"
+                  >
+                    {user.role === "admin" ? "Admin Panel" : "Quản lý rạp"}
+                  </Link>
+                )}
+                {user?.role === "customer" && (
+                  <>
+                    <Link to={`/${PATH.MY_TICKETS}`}
+                      className="text-gray-300 hover:text-white text-sm transition px-2 py-1.5"
+                    >
+                      🎫 Vé của tôi
+                    </Link>
+                    <Link to={`/${PATH.BOOKING_HISTORY}`}
+                      className="text-gray-300 hover:text-white text-sm transition px-2 py-1.5"
+                    >
+                      📋 Lịch sử
+                    </Link>
+                  </>
+                )}
                 <span className="text-gray-400 text-sm">
                   Xin chào, <span className="text-white font-medium">{user?.userName || "Khách"}</span>
                 </span>
@@ -109,12 +131,35 @@ function Navbar() {
           ))}
           <div className="pt-2 border-t border-gray-800 flex flex-col gap-2">
             {isAuthenticated ? (
-              <button
-                onClick={() => { dispatch(logout()); setMenuOpen(false); }}
-                className="text-left text-red-400 px-4 py-2 text-sm"
-              >
-                Đăng xuất
-              </button>
+              <>
+                {(user?.role === "admin" || user?.role === "theater-manager") && (
+                  <Link
+                    to={user.role === "admin" ? "/admin/dashboard" : "/manager/dashboard"}
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-center bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  >
+                    {user.role === "admin" ? "Admin Panel" : "Quản lý rạp"}
+                  </Link>
+                )}
+                {user?.role === "customer" && (
+                  <>
+                    <Link to={`/${PATH.MY_TICKETS}`} onClick={() => setMenuOpen(false)}
+                      className="block text-gray-300 px-4 py-2 text-sm hover:text-white">
+                      🎫 Vé của tôi
+                    </Link>
+                    <Link to={`/${PATH.BOOKING_HISTORY}`} onClick={() => setMenuOpen(false)}
+                      className="block text-gray-300 px-4 py-2 text-sm hover:text-white">
+                      📋 Lịch sử đặt vé
+                    </Link>
+                  </>
+                )}
+                <button
+                  onClick={() => { dispatch(logout()); setMenuOpen(false); }}
+                  className="text-left text-red-400 px-4 py-2 text-sm"
+                >
+                  Đăng xuất
+                </button>
+              </>
             ) : (
               <>
                 <Link to={`/auth/${PATH.SIGNIN}`} onClick={() => setMenuOpen(false)} className="block text-center border border-red-500 text-red-400 px-4 py-2 rounded-lg text-sm">

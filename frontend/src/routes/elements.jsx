@@ -1,7 +1,6 @@
 import { PATH, ADMIN_PATH, MANAGER_PATH } from "./path";
 import { useRoutes } from "react-router-dom";
 
-
 import AdminLayout from "../pages/admin/AdminLayout.jsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import AdminMovies from "../pages/admin/AdminMovies.jsx";
@@ -12,6 +11,10 @@ import AdminRevenue from "../pages/admin/AdminRevenue.jsx";
 
 import ManagerLayout from "../pages/manager/ManagerLayout.jsx";
 import ManagerDashboard from "../pages/manager/ManagerDashboard.jsx";
+import ManagerMovies from "../pages/manager/ManagerMovies.jsx";
+import ManagerShows from "../pages/manager/ManagerShows.jsx";
+import ManagerRooms from "../pages/manager/ManagerRooms.jsx";
+import ManagerBookings from "../pages/manager/ManagerBookings.jsx";
 
 
 import HomeLayout from "../components/layout/HomeLayout";
@@ -23,6 +26,8 @@ import NotFound from "../pages/NotFound";
 import MovieDetails from "../pages/customer/MovieDetails.jsx";
 import Booking from "../pages/customer/Booking.jsx";
 import Movies from "../pages/customer/Movies.jsx";
+import MyTickets from "../pages/customer/MyTickets.jsx";
+import BookingHistory from "../pages/customer/BookingHistory.jsx";
 import SigninPage from "../pages/auth/SigninPage";
 import VerifyMailPage from "../pages/auth/VerifyEmailPage";
 
@@ -53,7 +58,15 @@ const useRouterElements = () => {
                 {
                     path: PATH.COMING_SOON,
                     element: <Movies />,
-                }
+                },
+                {
+                    path: PATH.MY_TICKETS,
+                    element: <MyTickets />,
+                },
+                {
+                    path: PATH.BOOKING_HISTORY,
+                    element: <BookingHistory />,
+                },
             ]
         },
         {
@@ -90,10 +103,11 @@ const useRouterElements = () => {
             path: PATH.MANAGER,
             element: <ManagerLayout />,
             children: [
-                {
-                    path: MANAGER_PATH.DASHBOARD,
-                    element: <ManagerDashboard />,
-                }
+                { path: MANAGER_PATH.DASHBOARD, element: <ManagerDashboard /> },
+                { path: MANAGER_PATH.MOVIES,    element: <ManagerMovies /> },
+                { path: MANAGER_PATH.SHOWS,     element: <ManagerShows /> },
+                { path: MANAGER_PATH.ROOMS,     element: <ManagerRooms /> },
+                { path: MANAGER_PATH.BOOKINGS,  element: <ManagerBookings /> },
             ]
         },
         {

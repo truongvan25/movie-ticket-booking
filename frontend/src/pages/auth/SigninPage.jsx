@@ -1,134 +1,107 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button, Typography, message, Card, Checkbox } from "antd";
+import { Form, Input, Button, message } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/features/auth.slice.js";
-import { LockOutlined } from "@ant-design/icons";
-
-const { Title, Text } = Typography;
 
 const SigninPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [messageApi, contextHolder] = message.useMessage();
-
-    // Select relevant state from Redux store
     const { isAuthenticated, status, error, user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        if (isAuthenticated && status === 'succeeded') {
-            if (user.role === 'admin') {
-                navigate('/admin/dashboard', { replace: true });
-            } else if (user.role === 'theater-manager') {
-                navigate('/manager/dashboard', { replace: true });
+        if (isAuthenticated && status === "succeeded") {
+            if (user?.role === "admin") {
+                navigate("/admin/dashboard", { replace: true });
+            } else if (user?.role === "theater-manager") {
+                navigate("/manager/dashboard", { replace: true });
             } else {
-                navigate('/', { replace: true });
+                navigate("/", { replace: true });
             }
         }
     }, [isAuthenticated, status, navigate, user]);
 
     useEffect(() => {
-        if (status === 'failed' && error) {
-            messageApi.error(error);
-        } else if (status === 'succeeded') {
-            messageApi.success('Login successful!');
+        if (status === "failed" && error) {
+            message.error(error);
         }
-    }, [status, error, messageApi]);
+    }, [status, error]);
 
-    const onFinish = async (values) => {
-        try {
-            dispatch(loginUser({ email: values.email, password: values.password }));
-        } catch (error) {
-            console.error('Login failed:', error);
-        }
+    if (isAuthenticated && status !== "loading") return null;
+
+    const onFinish = (values) => {
+        dispatch(loginUser({ email: values.email, password: values.password }));
     };
-
-    const onFinishFailed = (errorInfo) => {
-        console.log('Form validation failed:', errorInfo);
-    };
-
-    // The RedirectIfAuthenticated component wrapped around LoginPage in App.js
-    // should prevent rendering this if already authenticated.
-    // This check is mainly for development if accessing LoginPage directly, or if there's a race condition.
-    if (isAuthenticated && status !== 'loading') {
-        return null;
-    }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-            {contextHolder}
-            <Card
-                className="w-full max-w-md shadow-lg rounded-lg"
-                style={{ padding: '2rem' }}
-            >
-                <div className="text-center mb-6">
-                    <Title level={2} className="text-gray-800">
-                        Welcome Back!
-                    </Title>
-                    <Text className="text-gray-500">
-                        Sign in to your account to continue.
-                    </Text>
+        <div className="min-h-screen flex items-center justify-center bg-gray-950 p-4">
+            <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8">
+                <div className="flex flex-col items-center mb-8">
+                    <span className="text-red-500 text-5xl mb-2">🎬</span>
+                    <h1 className="text-white text-2xl font-bold">
+                        Cine<span className="text-red-500">Book</span>
+                    </h1>
+                    <p className="text-gray-400 text-sm mt-1">Đăng nhập để tiếp tục</p>
                 </div>
 
-                <Form
-                    name="login"
-                    initialValues={{ remember: true }}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    layout="vertical" // Stack labels above inputs
-                >
+                <Form name="signin" layout="vertical" autoComplete="off" onFinish={onFinish}>
                     <Form.Item
-                        label="Email"
+                        label={<span className="text-gray-300 text-sm">Email</span>}
                         name="email"
                         rules={[
-                            { required: true, message: 'Please input your email!' },
+                            { required: true, message: "Hãy nhập email!" },
+                            { type: "email", message: "Email không hợp lệ!" },
                         ]}
-                        className="mb-4"
                     >
                         <Input
                             size="large"
-                            placeholder="Enter your email"
-                            className="rounded-md"
+                            placeholder="Email của bạn"
+                            className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="Password"
+                        label={<span className="text-gray-300 text-sm">Mật khẩu</span>}
                         name="password"
-                        rules={[
-                            { required: true, message: 'Please input your password!' },
-                        ]}
-                        className="mb-6"
+                        rules={[{ required: true, message: "Hãy nhập mật khẩu!" }]}
                     >
                         <Input.Password
                             size="large"
-                            placeholder="Enter your password"
-                            className="rounded-md"
+                            placeholder="Mật khẩu của bạn"
+                            className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                         />
                     </Form.Item>
 
-                    <Form.Item name="remember" valuePropName="checked" className="mb-6">
-                        <Checkbox>Remember me</Checkbox>
-                    </Form.Item>
-
-                    <Form.Item>
+                    <Form.Item className="mb-0 mt-2">
                         <Button
                             type="primary"
                             htmlType="submit"
-                            loading={status === 'loading'}
-                            className="w-full rounded-md pt-4 pb-5 text-lg font-semibold text-center"
+                            size="large"
+                            block
+                            loading={status === "loading"}
+                            className="rounded-lg font-semibold bg-red-500 hover:bg-red-600 border-0"
                         >
-                            Log in
+                            Đăng nhập
                         </Button>
                     </Form.Item>
-
-                    <div className="text-center mt-4">
-                        <a href="#" className="text-blue-500 hover:text-blue-700">
-                            Forgot password?
-                        </a>
-                    </div>
                 </Form>
-            </Card>
+
+                <div className="text-center mt-4">
+                    <Link
+                        to="/auth/forgot-password"
+                        className="text-gray-500 hover:text-gray-300 text-sm"
+                    >
+                        Quên mật khẩu?
+                    </Link>
+                </div>
+
+                <div className="text-center mt-6 text-sm text-gray-500">
+                    Chưa có tài khoản?{" "}
+                    <Link to="/auth/signup" className="text-red-400 hover:text-red-300 font-medium">
+                        Đăng ký
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 };

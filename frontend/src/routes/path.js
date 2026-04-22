@@ -10,6 +10,8 @@ export const PATH = {
 	ADMIN: "/admin",
 	MANAGER: "/manager",
 	VERIFY_EMAIL: "verify-email",
+	MY_TICKETS: "my-tickets",
+	BOOKING_HISTORY: "booking-history",
 };
 
 export const ADMIN_PATH = {
@@ -23,4 +25,8 @@ export const ADMIN_PATH = {
 
 export const MANAGER_PATH = {
 	DASHBOARD: "dashboard",
+	MOVIES: "movies",
+	SHOWS: "shows",
+	ROOMS: "rooms",
+	BOOKINGS: "bookings",
 };
