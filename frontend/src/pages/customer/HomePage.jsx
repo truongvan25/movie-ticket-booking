@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import movieApi from "../../api/modules/movie.api";
+import customerApi from "../../api/modules/customer.api.js";
 import { PATH } from "../../routes/path";
 
 const HERO_SLIDES = [
@@ -32,7 +34,8 @@ const HERO_SLIDES = [
   },
 ];
 
-function MovieCard({ movie, onBook, onDetail }) {
+function MovieCard({ movie, onBook, onDetail, favoriteIds, onToggleFav }) {
+  const isFav = favoriteIds?.includes(movie._id);
   return (
     <div
       onClick={() => onDetail(movie._id)}
@@ -56,6 +59,17 @@ function MovieCard({ movie, onBook, onDetail }) {
           <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
             ⭐ {movie.movieRating}
           </div>
+        )}
+        {onToggleFav && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleFav(movie._id); }}
+            title={isFav ? "Bỏ yêu thích" : "Thêm yêu thích"}
+            className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center rounded-full text-sm transition ${
+              isFav ? "bg-red-500 text-white" : "bg-black/40 text-gray-300 hover:text-red-400"
+            }`}
+          >
+            ♥
+          </button>
         )}
         <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -124,9 +138,12 @@ function SectionHeader({ title, onViewAll }) {
 
 function HomePage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((s) => s.auth);
+  const [searchInput, setSearchInput] = useState("");
   const [ongoingMovies, setOngoingMovies] = useState([]);
   const [comingSoonMovies, setComingSoonMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favoriteIds, setFavoriteIds] = useState([]);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -144,6 +161,21 @@ function HomePage() {
     };
     fetchMovies();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) { setFavoriteIds([]); return; }
+    customerApi.getMyFavorites().then((res) =>
+      setFavoriteIds((res?.data || []).map((m) => m._id || m))
+    );
+  }, [isAuthenticated]);
+
+  const handleToggleFav = async (movieId) => {
+    if (!isAuthenticated) { navigate(`/auth/${PATH.SIGNIN}`); return; }
+    await customerApi.toggleFavorite(movieId);
+    setFavoriteIds((prev) =>
+      prev.includes(movieId) ? prev.filter((id) => id !== movieId) : [...prev, movieId]
+    );
+  };
 
   const handleBook = (movieId) => navigate(`/${PATH.BOOKING}/${movieId}`);
   const handleDetail = (movieId) => navigate(`/${PATH.MOVIE_DETAILS}/${movieId}`);
@@ -188,6 +220,33 @@ function HomePage() {
         </Swiper>
       </div>
 
+      {/* Search bar */}
+      <div className="bg-gray-900 border-b border-gray-800">
+        <div className="max-w-2xl mx-auto px-4 py-5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = searchInput.trim();
+              navigate(q ? `/${PATH.ONGOING}?search=${encodeURIComponent(q)}` : `/${PATH.ONGOING}`);
+            }}
+            className="flex gap-2"
+          >
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="🔍  Tìm kiếm phim theo tên..."
+              className="flex-1 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition"
+            />
+            <button
+              type="submit"
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition"
+            >
+              Tìm
+            </button>
+          </form>
+        </div>
+      </div>
+
       {/* Now Showing */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SectionHeader
@@ -204,6 +263,8 @@ function HomePage() {
                 movie={movie}
                 onBook={handleBook}
                 onDetail={handleDetail}
+                favoriteIds={favoriteIds}
+                onToggleFav={handleToggleFav}
               />
             ))}
           </div>
@@ -233,6 +294,8 @@ function HomePage() {
                 movie={movie}
                 onBook={handleBook}
                 onDetail={handleDetail}
+                favoriteIds={favoriteIds}
+                onToggleFav={handleToggleFav}
               />
             ))}
           </div>

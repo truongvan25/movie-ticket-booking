@@ -184,12 +184,30 @@ export default function MovieDetails() {
                                 ))}
                             </div>
                             {avgRating !== null && <div className="mb-3"><StarRating value={avgRating} /></div>}
-                            <button
-                                onClick={() => navigate(`/${PATH.BOOKING}/${movieId}`)}
-                                className="mt-2 self-start bg-red-500 hover:bg-red-600 text-white px-7 py-2.5 rounded-xl font-semibold transition shadow-lg"
-                            >
-                                🎫 Đặt vé ngay
-                            </button>
+                            <div className="mt-2 flex items-center gap-3 flex-wrap">
+                                <button
+                                    onClick={() => navigate(`/${PATH.BOOKING}/${movieId}`)}
+                                    className="bg-red-500 hover:bg-red-600 text-white px-7 py-2.5 rounded-xl font-semibold transition shadow-lg"
+                                >
+                                    🎫 Đặt vé ngay
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        const url = window.location.href;
+                                        if (navigator.share) {
+                                            try {
+                                                await navigator.share({ title: movie.movieName, url });
+                                            } catch {}
+                                        } else {
+                                            await navigator.clipboard.writeText(url);
+                                            alert("Đã sao chép liên kết!");
+                                        }
+                                    }}
+                                    className="border border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-medium transition"
+                                >
+                                    ↗ Chia sẻ
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -224,7 +242,7 @@ export default function MovieDetails() {
                             {Object.values(showsByTheater).map(({ theater, shows: ts }) => (
                                 <div key={theater?._id} className="bg-gray-900 rounded-xl p-5 border border-gray-800">
                                     <p className="text-white font-semibold mb-1">{theater?.theaterName}</p>
-                                    {theater?.address && <p className="text-gray-500 text-xs mb-3">{theater.address}</p>}
+                                    {theater?.location && <p className="text-gray-500 text-xs mb-3">{theater.address}</p>}
                                     <div className="flex flex-wrap gap-2">
                                         {ts.map((s) => (
                                             <button

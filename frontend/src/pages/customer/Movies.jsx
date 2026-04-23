@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import movieApi from "../../api/modules/movie.api";
+import customerApi from "../../api/modules/customer.api.js";
 import { PATH } from "../../routes/path";
 
-function MovieCard({ movie, onBook, onDetail }) {
+function MovieCard({ movie, onBook, onDetail, favoriteIds, onToggleFav }) {
+    const isFav = favoriteIds?.includes(movie._id);
     return (
         <div
             onClick={() => onDetail(movie._id)}
@@ -27,6 +30,17 @@ function MovieCard({ movie, onBook, onDetail }) {
                     <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded">
                         {movie.ageRating}
                     </div>
+                )}
+                {onToggleFav && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onToggleFav(movie._id); }}
+                        title={isFav ? "Bỏ yêu thích" : "Thêm yêu thích"}
+                        className={`absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full text-sm transition ${
+                            isFav ? "bg-red-500 text-white" : "bg-black/40 text-gray-300 hover:text-red-400"
+                        }`}
+                    >
+                        ♥
+                    </button>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -63,18 +77,23 @@ function Skeleton() {
 function Movies() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const { isAuthenticated } = useSelector((s) => s.auth);
     const isOngoing = location.pathname === `/${PATH.ONGOING}`;
 
+    const initialSearch = searchParams.get("search") || "";
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState(initialSearch);
+    const [searchInput, setSearchInput] = useState(initialSearch);
+    const [favoriteIds, setFavoriteIds] = useState([]);
 
     useEffect(() => {
+        const q = searchParams.get("search") || "";
         setMovies([]);
-        setSearch("");
-        setSearchInput("");
-    }, [location.pathname]);
+        setSearch(q);
+        setSearchInput(q);
+    }, [location.pathname, location.search]);
 
     useEffect(() => {
         const fetchMovies = async () => {
@@ -91,6 +110,21 @@ function Movies() {
         };
         fetchMovies();
     }, [isOngoing, search]);
+
+    useEffect(() => {
+        if (!isAuthenticated) { setFavoriteIds([]); return; }
+        customerApi.getMyFavorites().then((res) =>
+            setFavoriteIds((res?.data || []).map((m) => m._id || m))
+        );
+    }, [isAuthenticated]);
+
+    const handleToggleFav = async (movieId) => {
+        if (!isAuthenticated) { navigate(`/auth/${PATH.SIGNIN}`); return; }
+        await customerApi.toggleFavorite(movieId);
+        setFavoriteIds((prev) =>
+            prev.includes(movieId) ? prev.filter((id) => id !== movieId) : [...prev, movieId]
+        );
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -161,6 +195,8 @@ function Movies() {
                                 movie={movie}
                                 onBook={handleBook}
                                 onDetail={handleDetail}
+                                favoriteIds={favoriteIds}
+                                onToggleFav={handleToggleFav}
                             />
                         ))}
                     </div>

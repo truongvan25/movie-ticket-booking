@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import managerApi from "../../api/modules/manager.api.js";
 
+const STATUS_LABEL = {
+    paid:      { label: "Đã thanh toán", cls: "bg-green-500/20 text-green-400" },
+    pending:   { label: "Chờ xử lý",     cls: "bg-yellow-500/20 text-yellow-400" },
+    cancelled: { label: "Đã hủy",        cls: "bg-red-500/20 text-red-400" },
+    expired:   { label: "Hết hạn",       cls: "bg-gray-500/20 text-gray-400" },
+    refunded:  { label: "Hoàn tiền",     cls: "bg-blue-500/20 text-blue-400" },
+};
+
 const STAT_CARDS = [
     { key: "totalTheaters", label: "Rạp của tôi",  icon: "🏢", color: "from-blue-600 to-blue-800" },
     { key: "totalMovies",   label: "Bộ phim",       icon: "🎬", color: "from-purple-600 to-purple-800" },
@@ -84,10 +92,10 @@ function ManagerDashboard() {
                                 <td className="py-3 pr-4 text-white font-medium">{b.totalPrice?.toLocaleString("vi-VN")}đ</td>
                                 <td className="py-3">
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                        b.status === "paid" ? "bg-green-500/20 text-green-400" :
-                                        b.status === "pending" ? "bg-yellow-500/20 text-yellow-400" :
-                                        "bg-gray-500/20 text-gray-400"
-                                    }`}>{b.status}</span>
+                                        (STATUS_LABEL[b.status] || STATUS_LABEL.expired).cls
+                                    }`}>
+                                        {(STATUS_LABEL[b.status] || { label: b.status }).label}
+                                    </span>
                                 </td>
                             </tr>
                         ))}

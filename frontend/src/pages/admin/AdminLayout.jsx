@@ -11,6 +11,9 @@ const NAV_ITEMS = [
     { label: "Người dùng",    to: `/admin/${ADMIN_PATH.USERS}`,       icon: "👥" },
     { label: "Đặt vé",        to: `/admin/${ADMIN_PATH.BOOKINGS}`,    icon: "🎫" },
     { label: "Doanh thu",     to: `/admin/${ADMIN_PATH.REVENUE}`,     icon: "💰" },
+    { label: "Đánh giá",      to: `/admin/${ADMIN_PATH.REVIEWS}`,     icon: "⭐" },
+    { label: "Hỗ trợ",        to: `/admin/${ADMIN_PATH.SUPPORT}`,     icon: "💬" },
+    { label: "Mã KM",          to: `/admin/${ADMIN_PATH.PROMO_CODES}`, icon: "🎟️" },
 ];
 
 const AdminLayout = () => {
@@ -97,7 +100,7 @@ const AdminLayout = () => {
                     <h2 className="text-white font-semibold text-sm">
                         {NAV_ITEMS.find((n) => location.pathname === n.to)?.label ?? "Admin"}
                     </h2>
-                    <span className="text-xs text-gray-500 bg-red-500/10 text-red-400 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded-full font-medium">
                         Admin
                     </span>
                 </div>

@@ -15,7 +15,11 @@ import ManagerMovies from "../pages/manager/ManagerMovies.jsx";
 import ManagerShows from "../pages/manager/ManagerShows.jsx";
 import ManagerRooms from "../pages/manager/ManagerRooms.jsx";
 import ManagerBookings from "../pages/manager/ManagerBookings.jsx";
+import ManagerReviews from "../pages/manager/ManagerReviews.jsx";
 
+import AdminReviews from "../pages/admin/AdminReviews.jsx";
+import AdminSupport from "../pages/admin/AdminSupport.jsx";
+import AdminPromoCodes from "../pages/admin/AdminPromoCodes.jsx";
 
 import HomeLayout from "../components/layout/HomeLayout";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -28,6 +32,9 @@ import Booking from "../pages/customer/Booking.jsx";
 import Movies from "../pages/customer/Movies.jsx";
 import MyTickets from "../pages/customer/MyTickets.jsx";
 import BookingHistory from "../pages/customer/BookingHistory.jsx";
+import ProfilePage from "../pages/customer/ProfilePage.jsx";
+import SupportPage from "../pages/customer/SupportPage.jsx";
+import FavoritesPage from "../pages/customer/FavoritesPage.jsx";
 import SigninPage from "../pages/auth/SigninPage";
 import VerifyMailPage from "../pages/auth/VerifyEmailPage";
 
@@ -67,6 +74,18 @@ const useRouterElements = () => {
                     path: PATH.BOOKING_HISTORY,
                     element: <BookingHistory />,
                 },
+                {
+                    path: PATH.PROFILE,
+                    element: <ProfilePage />,
+                },
+                {
+                    path: PATH.SUPPORT,
+                    element: <SupportPage />,
+                },
+                {
+                    path: PATH.FAVORITES,
+                    element: <FavoritesPage />,
+                },
             ]
         },
         {
@@ -97,6 +116,18 @@ const useRouterElements = () => {
                     path: ADMIN_PATH.REVENUE,
                     element: <AdminRevenue />,
                 },
+                {
+                    path: ADMIN_PATH.REVIEWS,
+                    element: <AdminReviews />,
+                },
+                {
+                    path: ADMIN_PATH.SUPPORT,
+                    element: <AdminSupport />,
+                },
+                {
+                    path: ADMIN_PATH.PROMO_CODES,
+                    element: <AdminPromoCodes />,
+                },
             ]
         },
         {
@@ -108,6 +139,7 @@ const useRouterElements = () => {
                 { path: MANAGER_PATH.SHOWS,     element: <ManagerShows /> },
                 { path: MANAGER_PATH.ROOMS,     element: <ManagerRooms /> },
                 { path: MANAGER_PATH.BOOKINGS,  element: <ManagerBookings /> },
+                { path: MANAGER_PATH.REVIEWS,  element: <ManagerReviews /> },
             ]
         },
         {

@@ -1,18 +1,17 @@
-import React from "react";
-import { Form, Input, Button, Typography, message } from "antd";
+import React, { useState } from "react";
+import { Form, Input, Button, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAddOutlined } from "@ant-design/icons";
 import publicClient from "../../api/clients/public.client";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../redux/features/loading.slice.js";
 
-const { Title, Text } = Typography;
-
 function SignupPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [errorMsg, setErrorMsg] = useState("");
 
   const onFinish = async (values) => {
+    setErrorMsg("");
     dispatch(showLoading());
     try {
       const res = await publicClient.post("user/signup", {
@@ -30,8 +29,8 @@ function SignupPage() {
         navigate("/auth/signin");
       }
     } catch (err) {
-      const msg = err?.data?.message || err?.message || "Đăng ký thất bại";
-      message.error(msg);
+      const msg = err?.message || err?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      setErrorMsg(msg);
     } finally {
       dispatch(hideLoading());
     }
@@ -117,6 +116,12 @@ function SignupPage() {
               className="rounded-lg bg-gray-800 border-gray-700 text-white placeholder-gray-500"
             />
           </Form.Item>
+
+          {errorMsg && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {errorMsg}
+            </div>
+          )}
 
           <Form.Item className="mb-0 mt-2">
             <Button

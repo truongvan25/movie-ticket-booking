@@ -111,6 +111,11 @@ export default function Booking() {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState("");
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
+    const [promoInput, setPromoInput] = useState("");
+    const [promoDiscount, setPromoDiscount] = useState(0);
+    const [promoApplied, setPromoApplied] = useState(null);
+    const [promoError, setPromoError] = useState("");
+    const [promoLoading, setPromoLoading] = useState(false);
 
     useEffect(() => {
         if (!movieId) return;
@@ -165,12 +170,36 @@ export default function Booking() {
             else next.add(seat._id);
             return next;
         });
+        // Reset promo when seat selection changes
+        setPromoApplied(null);
+        setPromoDiscount(0);
+        setPromoInput("");
+        setPromoError("");
     };
 
     const selectedSeats = seats.filter((s) => selected.has(s._id));
     const totalPrice = selectedSeats.reduce(
         (sum, s) => sum + Math.round((selectedShow?.price || 0) * (PRICE_MULT[s.seatType] || 1)), 0
     );
+
+    const applyPromo = async () => {
+        if (!promoInput.trim()) return;
+        setPromoError("");
+        setPromoLoading(true);
+        try {
+            const res = await customerApi.validatePromo({ code: promoInput.trim(), totalPrice });
+            setPromoDiscount(res?.data?.discount || 0);
+            setPromoApplied(promoInput.trim().toUpperCase());
+        } catch (e) {
+            setPromoError(e?.message || "Mã không hợp lệ");
+            setPromoDiscount(0);
+            setPromoApplied(null);
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    const finalPrice = Math.max(0, totalPrice - promoDiscount);
 
     const handleBook = async () => {
         if (!isAuthenticated) {
@@ -184,6 +213,7 @@ export default function Booking() {
             const res = await customerApi.createBooking({
                 showId: selectedShow._id,
                 seatIds: [...selected],
+                promoCode: promoApplied || undefined,
             });
             setSuccess(res?.data?.booking || res?.data);
         } catch (e) {
@@ -283,7 +313,7 @@ export default function Booking() {
                             Object.values(showsByTheater).map(({ theater, shows: ts }) => (
                                 <div key={theater?._id} className="bg-gray-900 rounded-xl p-5 border border-gray-800">
                                     <p className="text-white font-semibold mb-1">{theater?.theaterName}</p>
-                                    {theater?.address && <p className="text-gray-500 text-xs mb-3">{theater.address}</p>}
+                                    {theater?.location && <p className="text-gray-500 text-xs mb-3">{theater.address}</p>}
                                     <div className="flex flex-wrap gap-2">
                                         {ts.map((s) => (
                                             <button key={s._id}
@@ -303,6 +333,11 @@ export default function Booking() {
                             ))
                         )}
                     </div>
+                )}
+
+                {/* Step 2 loading fallback */}
+                {step === 2 && !selectedShow && (
+                    <div className="text-center text-gray-500 py-20 animate-pulse">Đang tải suất chiếu...</div>
                 )}
 
                 {/* Step 2: Seat selection */}
@@ -375,15 +410,62 @@ export default function Booking() {
                                                 </span>
                                             </div>
                                         ))}
-                                        <div className="flex justify-between font-bold text-sm border-t border-gray-800 pt-2 mt-2">
-                                            <span className="text-gray-300">Tổng cộng</span>
-                                            <span className="text-red-400">{totalPrice.toLocaleString("vi-VN")}đ</span>
+                                        <div className="border-t border-gray-800 pt-2 mt-2 space-y-1">
+                                            {promoDiscount > 0 && (
+                                                <>
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-gray-400">Tạm tính</span>
+                                                        <span className="text-gray-400">{totalPrice.toLocaleString("vi-VN")}đ</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-green-400">Giảm ({promoApplied})</span>
+                                                        <span className="text-green-400">-{promoDiscount.toLocaleString("vi-VN")}đ</span>
+                                                    </div>
+                                                </>
+                                            )}
+                                            <div className="flex justify-between font-bold text-sm">
+                                                <span className="text-gray-300">Tổng cộng</span>
+                                                <span className="text-red-400">{finalPrice.toLocaleString("vi-VN")}đ</span>
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (
                                     <p className="text-gray-600 text-sm text-center py-3 border-t border-gray-800 mt-3 mb-4">
                                         Chọn ghế để xem giá
                                     </p>
+                                )}
+
+                                {/* Promo code */}
+                                {selectedSeats.length > 0 && !promoApplied && (
+                                    <div className="mb-3">
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={promoInput}
+                                                onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                                                placeholder="Mã khuyến mãi"
+                                                className="flex-1 bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                                            />
+                                            <button
+                                                onClick={applyPromo}
+                                                disabled={promoLoading || !promoInput.trim()}
+                                                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs px-3 py-2 rounded-lg transition"
+                                            >
+                                                {promoLoading ? "..." : "Áp dụng"}
+                                            </button>
+                                        </div>
+                                        {promoError && <p className="text-red-400 text-xs mt-1">{promoError}</p>}
+                                    </div>
+                                )}
+                                {promoApplied && (
+                                    <div className="flex items-center justify-between text-xs bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2 mb-3">
+                                        <span className="text-green-400">✓ {promoApplied} đã áp dụng</span>
+                                        <button
+                                            onClick={() => { setPromoApplied(null); setPromoDiscount(0); setPromoInput(""); }}
+                                            className="text-gray-500 hover:text-red-400 transition"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
                                 )}
 
                                 {error && <p className="text-red-400 text-xs mb-3">{error}</p>}

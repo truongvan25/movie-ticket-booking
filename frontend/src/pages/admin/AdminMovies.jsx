@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import adminApi from "../../api/modules/admin.api.js";
+import Pagination from "../../components/common/Pagination.jsx";
+
+const LIMIT = 20;
 
 const STATUS_OPTIONS = [
     { value: "", label: "Tất cả" },
@@ -23,21 +26,29 @@ function AdminMovies() {
     const [editingId, setEditingId] = useState(null);
     const [editStatus, setEditStatus] = useState("");
     const [saving, setSaving] = useState(false);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
 
     const fetchMovies = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await adminApi.getMovies({ status: statusFilter, search });
-            setMovies(res?.data || []);
+            const res = await adminApi.getMovies({ status: statusFilter, search, page, limit: LIMIT });
+            const d = res?.data || {};
+            setMovies(d.items || []);
+            setTotal(d.total || 0);
+            setTotalPages(d.totalPages || 1);
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, search]);
+    }, [statusFilter, search, page]);
 
     useEffect(() => { fetchMovies(); }, [fetchMovies]);
+    useEffect(() => { setPage(1); }, [statusFilter, search]);
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setPage(1);
         setSearch(searchInput.trim());
     };
 
@@ -192,9 +203,7 @@ function AdminMovies() {
                         </tbody>
                     </table>
                 </div>
-                <div className="px-4 py-3 border-t border-gray-800 text-gray-500 text-xs">
-                    {movies.length} bộ phim
-                </div>
+                <Pagination page={page} totalPages={totalPages} total={total} onChange={setPage} />
             </div>
         </div>
     );

@@ -12,6 +12,9 @@ export const PATH = {
 	VERIFY_EMAIL: "verify-email",
 	MY_TICKETS: "my-tickets",
 	BOOKING_HISTORY: "booking-history",
+	PROFILE: "profile",
+	SUPPORT: "support",
+	FAVORITES: "favorites",
 };
 
 export const ADMIN_PATH = {
@@ -21,6 +24,9 @@ export const ADMIN_PATH = {
 	THEATERS: "theaters",
 	BOOKINGS: "bookings",
 	REVENUE: "revenue",
+	REVIEWS: "reviews",
+	SUPPORT: "support",
+	PROMO_CODES: "promo-codes",
 };
 
 export const MANAGER_PATH = {
@@ -29,4 +35,5 @@ export const MANAGER_PATH = {
 	SHOWS: "shows",
 	ROOMS: "rooms",
 	BOOKINGS: "bookings",
+	REVIEWS: "reviews",
 };

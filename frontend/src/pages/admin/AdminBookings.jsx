@@ -18,6 +18,28 @@ const STATUS_STYLE = {
     refunded:  "bg-blue-500/20 text-blue-400",
 };
 
+function exportCSV(bookings) {
+    const rows = [
+        ["Khách hàng", "Email", "Phim", "Tổng tiền", "Trạng thái", "Ngày đặt"],
+        ...bookings.map((b) => [
+            b.userId?.userName || "",
+            b.userId?.email || "",
+            b.showId?.movieId?.movieName || "",
+            b.totalPrice || 0,
+            b.status || "",
+            new Date(b.createdAt).toLocaleString("vi-VN"),
+        ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookings_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 function AdminBookings() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,17 +54,26 @@ function AdminBookings() {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
                 <h2 className="text-white font-bold text-lg">Quản lý đặt vé</h2>
-                <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-red-500"
-                >
-                    {STATUS_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                </select>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => exportCSV(bookings)}
+                        disabled={loading || !bookings.length}
+                        className="flex items-center gap-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition"
+                    >
+                        ↓ Xuất CSV
+                    </button>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-red-500"
+                    >
+                        {STATUS_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">

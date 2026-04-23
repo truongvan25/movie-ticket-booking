@@ -72,6 +72,12 @@ const SigninPage = () => {
                         />
                     </Form.Item>
 
+                    {status === "failed" && error && (
+                        <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <Form.Item className="mb-0 mt-2">
                         <Button
                             type="primary"

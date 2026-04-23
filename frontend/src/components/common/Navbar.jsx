@@ -68,11 +68,19 @@ function Navbar() {
                     >
                       📋 Lịch sử
                     </Link>
+                    <Link to={`/${PATH.FAVORITES}`}
+                      className="text-gray-300 hover:text-white text-sm transition px-2 py-1.5"
+                    >
+                      ❤️ Yêu thích
+                    </Link>
                   </>
                 )}
-                <span className="text-gray-400 text-sm">
-                  Xin chào, <span className="text-white font-medium">{user?.userName || "Khách"}</span>
-                </span>
+                <Link
+                  to={`/${PATH.PROFILE}`}
+                  className="text-gray-400 hover:text-white text-sm transition"
+                >
+                  <span className="text-white font-medium">{user?.userName || "Khách"}</span>
+                </Link>
                 <button
                   onClick={() => dispatch(logout())}
                   className="border border-gray-600 text-gray-300 hover:border-red-500 hover:text-red-400 px-4 py-1.5 rounded-lg text-sm transition"
@@ -151,8 +159,20 @@ function Navbar() {
                       className="block text-gray-300 px-4 py-2 text-sm hover:text-white">
                       📋 Lịch sử đặt vé
                     </Link>
+                    <Link to={`/${PATH.FAVORITES}`} onClick={() => setMenuOpen(false)}
+                      className="block text-gray-300 px-4 py-2 text-sm hover:text-white">
+                      ❤️ Yêu thích
+                    </Link>
+                    <Link to={`/${PATH.SUPPORT}`} onClick={() => setMenuOpen(false)}
+                      className="block text-gray-300 px-4 py-2 text-sm hover:text-white">
+                      💬 Hỗ trợ
+                    </Link>
                   </>
                 )}
+                <Link to={`/${PATH.PROFILE}`} onClick={() => setMenuOpen(false)}
+                  className="block text-gray-300 px-4 py-2 text-sm hover:text-white border-b border-gray-800 pb-2 mb-1">
+                  👤 {user?.userName}
+                </Link>
                 <button
                   onClick={() => { dispatch(logout()); setMenuOpen(false); }}
                   className="text-left text-red-400 px-4 py-2 text-sm"

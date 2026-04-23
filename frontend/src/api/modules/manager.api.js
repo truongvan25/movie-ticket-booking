@@ -27,6 +27,13 @@ const managerApi = {
         const q = status ? `?status=${status}` : "";
         return configuredPrivateClient.get(`theater-manager/bookings${q}`);
     },
+
+    getReviews: (params = {}) => {
+        const q = new URLSearchParams();
+        if (params.page) q.append("page", params.page);
+        if (params.limit) q.append("limit", params.limit);
+        return configuredPrivateClient.get(`theater-manager/reviews?${q}`);
+    },
 };
 
 export default managerApi;

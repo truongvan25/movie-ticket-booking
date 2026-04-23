@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import adminApi from "../../api/modules/admin.api.js";
+import Pagination from "../../components/common/Pagination.jsx";
+
+const LIMIT = 20;
 
 const ROLE_OPTIONS = [
     { value: "", label: "Tất cả" },
@@ -21,21 +24,29 @@ function AdminUsers() {
     const [searchInput, setSearchInput] = useState("");
     const [roleFilter, setRoleFilter] = useState("");
     const [saving, setSaving] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await adminApi.getUsers({ role: roleFilter, search });
-            setUsers(res?.data || []);
+            const res = await adminApi.getUsers({ role: roleFilter, search, page, limit: LIMIT });
+            const d = res?.data || {};
+            setUsers(d.items || []);
+            setTotal(d.total || 0);
+            setTotalPages(d.totalPages || 1);
         } finally {
             setLoading(false);
         }
-    }, [roleFilter, search]);
+    }, [roleFilter, search, page]);
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
+    useEffect(() => { setPage(1); }, [roleFilter, search]);
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setPage(1);
         setSearch(searchInput.trim());
     };
 
@@ -173,9 +184,7 @@ function AdminUsers() {
                         </tbody>
                     </table>
                 </div>
-                <div className="px-4 py-3 border-t border-gray-800 text-gray-500 text-xs">
-                    {users.length} người dùng
-                </div>
+                <Pagination page={page} totalPages={totalPages} total={total} onChange={setPage} />
             </div>
         </div>
     );

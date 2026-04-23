@@ -9,6 +9,7 @@ const navItems = [
   { label: "Lịch chiếu",  to: "/manager/shows",     icon: "📅" },
   { label: "Phòng chiếu", to: "/manager/rooms",     icon: "🪑" },
   { label: "Đặt vé",      to: "/manager/bookings",  icon: "🎫" },
+  { label: "Đánh giá",    to: "/manager/reviews",   icon: "⭐" },
 ];
 
 const ManagerLayout = () => {
