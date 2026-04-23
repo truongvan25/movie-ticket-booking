@@ -4,6 +4,7 @@ import Theater from "../models/theater.model.js";
 import Room from "../models/rooms.model.js";
 import Show from "../models/show.model.js";
 import Booking from "../models/booking.model.js";
+import Review from "../models/review.model.js";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 const getManagerTheaters = (managerId) =>
@@ -242,6 +243,43 @@ const getBookings = async (req, res) => {
     }
 };
 
+// ── REVIEWS ────────────────────────────────────────────────────────────────
+const getReviews = async (req, res) => {
+    try {
+        const theaters = await getManagerTheaters(req.user._id);
+        const theaterIds = theaters.map((t) => t._id);
+        const movieIds = await Movie.find({
+            theaterManagerId: req.user._id,
+            isDeleted: false,
+        }).distinct("_id");
+
+        const { page, limit } = req.query;
+        const pageNum = Math.max(1, parseInt(page) || 1);
+        const limitNum = Math.min(100, parseInt(limit) || 20);
+        const skip = (pageNum - 1) * limitNum;
+
+        const filter = { movieId: { $in: movieIds } };
+        const [reviews, total] = await Promise.all([
+            Review.find(filter)
+                .populate("userId", "userName email")
+                .populate("movieId", "movieName")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum),
+            Review.countDocuments(filter),
+        ]);
+
+        return responseHandler.ok(res, {
+            items: reviews,
+            total,
+            page: pageNum,
+            totalPages: Math.ceil(total / limitNum),
+        });
+    } catch (err) {
+        responseHandler.error(res);
+    }
+};
+
 export default {
     getStats,
     getMyTheaters,
@@ -249,4 +287,5 @@ export default {
     getRooms, addRoom, deleteRoom,
     getShows, addShow, updateShow, deleteShow,
     getBookings,
+    getReviews,
 };

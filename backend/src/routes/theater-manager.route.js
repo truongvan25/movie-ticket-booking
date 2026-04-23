@@ -25,4 +25,6 @@ router.delete("/shows/:showId", tm.deleteShow);
 
 router.get("/bookings", tm.getBookings);
 
+router.get("/reviews", tm.getReviews);
+
 export default router;

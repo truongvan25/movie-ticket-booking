@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Movie",
+    }],
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

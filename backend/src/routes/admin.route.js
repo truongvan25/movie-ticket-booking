@@ -19,4 +19,15 @@ router.get("/bookings", adminController.getBookings);
 
 router.get("/revenue", adminController.getRevenue);
 
+router.get("/reviews", adminController.getReviews);
+router.delete("/reviews/:reviewId", adminController.deleteReview);
+
+router.get("/support", adminController.getSupport);
+router.put("/support/:ticketId", adminController.replySupport);
+
+router.get("/promo-codes", adminController.getPromoCodes);
+router.post("/promo-codes", adminController.createPromoCode);
+router.put("/promo-codes/:id", adminController.updatePromoCode);
+router.delete("/promo-codes/:id", adminController.deletePromoCode);
+
 export default router;
